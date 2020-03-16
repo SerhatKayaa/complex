@@ -40,7 +40,6 @@ app.get('/', (req, res) => {
 });
 
 app.get('/values/all', async (req, res) => {
-  console.log('inside there')
   const values = await pgClient.query('SELECT * from values');
 
   res.send(values.rows);
@@ -61,7 +60,9 @@ app.post('/values', async (req, res) => {
 
   redisClient.hset('values', index, 'Nothing yet!');
   redisPublisher.publish('insert', index);
-  pgClient.query('INSERT INTO values(number) VALUES($1)', [index]);
+  pgClient.query(`INSERT INTO values(number) VALUES(${index})`, (err, res) => {
+    console.log(err, res);
+  });
 
   res.send({ working: true });
 });
