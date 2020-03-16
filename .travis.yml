@@ -1,0 +1,23 @@
+sudo: required
+services: 
+    - docker
+
+before_install:
+    - docker build -t serhatkayaa/react-test -f ./client/Dockerfile.dev ./client
+
+
+script: 
+    - docker run -e CI=true serhatkayaa/react-test npm test
+
+
+after_success:
+    - docker build -t serhatkayaa/complex-client ./client
+    - docker build -t serhatkayaa/complex-nginx ./nginx
+    - docker build -t serhatkayaa/complex-server ./server
+    - docker build -t serhatkayaa/complex-worker ./worker
+    # Login process
+    - echo "$DOCKER_PASSWORD" | docker login -u | "$DOCKER_ID" --password-stdin
+    - docker push serhatkayaa/complex-client
+    - docker push serhatkayaa/complex-nginx
+    - docker push serhatkayaa/complex-server
+    - docker push serhatkayaa/complex-worker
